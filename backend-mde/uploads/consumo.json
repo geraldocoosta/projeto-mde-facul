@@ -1,0 +1,34 @@
+[
+  {
+    "dia": "02/05/2019",
+    "consumoEnergetico": 15
+  },
+  {
+    "dia": "03/05/2019",
+    "consumoEnergetico": 15
+  },
+  {
+    "dia": "04/05/2019",
+    "consumoEnergetico": 15
+  },
+  {
+    "dia": "05/05/2019",
+    "consumoEnergetico": 20
+  },
+  {
+    "dia": "06/05/2019",
+    "consumoEnergetico": 40
+  },
+  {
+    "dia": "07/05/2019",
+    "consumoEnergetico": 80
+  },
+  {
+    "dia": "08/05/2019",
+    "consumoEnergetico": 15
+  },
+  {
+    "dia": "09/05/2019",
+    "consumoEnergetico": 32
+  }
+]
