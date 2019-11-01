@@ -19,9 +19,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.post("/file/upload", upload.single("file"), (_, res) => res.send("sucess"));
-
-app.get("/consumo-energia", (_, res) => {
+app.post("/file/upload", upload.single("file"), (_, res) => {
   const pathNormalized = path.normalize(`${__dirname}/uploads/consumo.json`);
   res.json(JSON.parse(fs.readFileSync(pathNormalized)));
 });

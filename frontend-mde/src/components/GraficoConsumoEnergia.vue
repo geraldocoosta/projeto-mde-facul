@@ -1,27 +1,45 @@
 <template>
-  <div>
-    <h1 class="mt-5">Oi</h1>
-    <button @click="voltar">change</button>
+  <div id="consumoEnergia">
+    <h2>Seu consumo de energia</h2>
+    <div>
+      <div>
+        <canvas id="consumo-energia"></canvas>
+      </div>
+      <b-button variant="primary" @click="voltar">Voltar</b-button>
+    </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+import Chart from "chart.js";
+
+import consumoEnergiaGraph from "@/graphs/ConsumoEnergia";
+
 export default {
-  data() {
-    return {
-      consumo: {}
-    };
+  props: {
+    consumo: {
+      required: true,
+      type: Array
+    }
   },
   methods: {
     voltar() {
       this.$emit("changeSucess");
+    },
+    createChart(chartId, chartData) {
+      const ctx = document.getElementById(chartId);
+      new Chart(ctx, {
+        type: chartData.type,
+        data: chartData.data,
+        options: chartData.options
+      });
     }
   },
-  created() {
-    axios
-      .get("http://localhost:3000/consumo-energia")
-      .then(res => (this.consumo = res.data));
+  mounted() {
+    this.createChart(
+      "consumo-energia",
+      consumoEnergiaGraph("Consumo por dia", this.consumo)
+    );
   }
 };
 </script>
