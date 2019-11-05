@@ -1,27 +1,41 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 const cors = require("cors");
+var os = require("os");
 
 const app = express();
 
 app.use(cors());
 
-const storage = multer.diskStorage({
-  destination(_req, _file, cb) {
-    cb(null, "uploads/");
-  },
-  filename(_req, file, cb) {
-    cb(null, `consumoenergia${path.extname(file.originalname)}`);
-  }
-});
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-const upload = multer({ storage });
+const SEGUNDOS_HORA = 3600;
 
-app.post("/file/upload", upload.single("file"), (_, res) => {
-  const pathNormalized = path.normalize(`${__dirname}/uploads/consumo.json`);
-  res.json(JSON.parse(fs.readFileSync(pathNormalized)));
+app.post("/file/upload", upload.single("file"), (req, res) => {
+  const consumoEnergetico = req.file.buffer.toString();
+
+  const correnteTensao = consumoEnergetico.split(os.EOL); // split por quebra de linha
+
+  let gastoAcumulativo = 0;
+
+  const correnteTensaoPotencia = correnteTensao.map(correnteTensao => {
+    [corrente, tensao] = correnteTensao.split("|");
+
+    const potencia = corrente * tensao;
+    const gastoKwH = potencia / SEGUNDOS_HORA;
+    gastoAcumulativo += gastoKwH;
+    
+    return {
+      corrente,
+      tensao,
+      potencia,
+      kwh: gastoKwH,
+      acumulativo: gastoAcumulativo
+    };
+  });
+
+  res.json(correnteTensaoPotencia);
 });
 
 app.listen(3000, () => console.log("App na porta 3000"));

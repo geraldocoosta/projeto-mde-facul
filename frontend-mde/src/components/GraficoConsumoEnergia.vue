@@ -38,10 +38,8 @@ export default {
   mounted() {
     this.createChart(
       "consumo-energia",
-      consumoEnergiaGraph("Consumo por dia", this.consumo)
+      consumoEnergiaGraph("consumo", this.consumo)
     );
   }
 };
 </script>
-
-<style></style>
