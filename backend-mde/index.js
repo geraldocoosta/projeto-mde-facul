@@ -1,41 +1,33 @@
 const express = require("express");
-const multer = require("multer");
 const cors = require("cors");
-var os = require("os");
+const serialPort = require("serialport");
+const Readline = require("@serialport/parser-readline");
 
 const app = express();
-
 app.use(cors());
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const port = new serialPort("\\\\.\\COM5", { baudRate: 9600 }, err => {
+  if (err) console.log(err);
+});
 
-const SEGUNDOS_HORA = 3600;
+const parser = port.pipe(new Readline({ delimiter: "\r\n" }));
 
-app.post("/file/upload", upload.single("file"), (req, res) => {
-  const consumoEnergetico = req.file.buffer.toString();
+let valorEnergeticoSomado = 0;
+let segundos = 0;
 
-  const correnteTensao = consumoEnergetico.split(os.EOL); // split por quebra de linha
+parser.on("data", line => {
+  let watts = Number(line.split("|")[3].replace("W", ""));
+  let gastoKwH = watts / 3600;
+  valorEnergeticoSomado += gastoKwH;
+  segundos = line.split("|")[2].replace("S", "");
+});
 
-  let gastoAcumulativo = 0;
-
-  const correnteTensaoPotencia = correnteTensao.map(correnteTensao => {
-    [corrente, tensao] = correnteTensao.split("|");
-
-    const potencia = corrente * tensao;
-    const gastoKwH = potencia / SEGUNDOS_HORA;
-    gastoAcumulativo += gastoKwH;
-    
-    return {
-      corrente,
-      tensao,
-      potencia,
-      kwh: gastoKwH,
-      acumulativo: gastoAcumulativo
-    };
+app.get("/buscar-energia", (_, res) => {
+  res.json({
+    acumulativo: valorEnergeticoSomado,
+    segundos
   });
-
-  res.json(correnteTensaoPotencia);
 });
 
 app.listen(3000, () => console.log("App na porta 3000"));
+
