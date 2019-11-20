@@ -1,6 +1,6 @@
 export default (tituloGraph, consumo) => {
   const dataGraph = consumo.map(c => c.acumulativo);
-  const labels = consumo.map(() => "");
+  const labels = consumo.map(c => "" + c.segundos + "s");
   const backgroundColor = "rgba(54,73,93,.5)";
   const borderColor = "#36495d";
 

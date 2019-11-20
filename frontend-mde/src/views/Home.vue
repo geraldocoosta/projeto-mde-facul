@@ -1,20 +1,28 @@
 <template>
   <div id="home">
-    <div v-if="!sucess">
+    <div>
       <b-row class="my-1">
-        <b-form-file
-          placeholder="Escolha um arquivo"
-          :state="Boolean(file)"
-          drop-placeholder="Escolha um arquivo"
-          v-model="file"
-        ></b-form-file>
+        <b-form-input
+          v-model="nomeAparelho"
+          placeholder="Nome do aparelho"
+        ></b-form-input>
       </b-row>
-      <div class="mt-3">Arquivo selecionado: {{ file ? file.name : "" }}</div>
-      <b-button variant="primary" v-on:click="submitFile()">Enviar</b-button>
+      <b-row class="my-1" v-if="!sucess">
+        <b-form-input
+          type="number"
+          v-model.number="tempoVerificacao"
+          placeholder="Tempo em segundos para verificação"
+        ></b-form-input>
+      </b-row>
+      <b-button v-if="!sucess" variant="primary" v-on:click="submitFile()"
+        >Começar medição</b-button
+      >
     </div>
     <grafico-consumo-energia
       v-if="sucess"
       :consumo="consumo"
+      :aparecerParar="timer !== null"
+      @parar="onPararTimer"
       @changeSucess="changeSucess"
     />
   </div>
@@ -28,8 +36,10 @@ export default {
   name: "home",
   data() {
     return {
-      consumo: {},
-      file: null,
+      consumo: [],
+      timer: null,
+      tempoVerificacao: null,
+      nomeAparelho: null,
       sucess: false
     };
   },
@@ -37,24 +47,36 @@ export default {
     GraficoConsumoEnergia
   },
   methods: {
-    handleFileUpload() {
-      this.file = this.$refs.file.files[0];
+    onPararTimer() {
+      if (this.timer) {
+        clearTimeout(this.timer);
+        this.timer = null;
+      }
     },
     changeSucess() {
       this.sucess = false;
+      if (this.timer) {
+        clearTimeout(this.timer);
+        this.timer = null;
+      }
     },
-    submitFile() {
-      const formData = new FormData();
-      formData.append("file", this.file);
+    buscaInformacoes() {
       axios
-        .post("http://localhost:3000/file/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" }
-        })
+        .get("http://localhost:3000/buscar-energia")
         .then(res => {
-          this.consumo = res.data;
-          this.sucess = true;
+          this.consumo.push(res.data);
+          this.$bus.$emit("novaEmissao");
         })
         .catch(() => console.log("failure"));
+    },
+    buscaInformacoesCadaSegundo() {
+      let tempoRequisicao = this.tempoVerificacao * 1000 || 1000;
+      this.buscaInformacoes();
+      this.timer = setTimeout(this.buscaInformacoesCadaSegundo, tempoRequisicao);
+    },
+    submitFile() {
+      this.sucess = true;
+      this.buscaInformacoesCadaSegundo();
     }
   }
 };

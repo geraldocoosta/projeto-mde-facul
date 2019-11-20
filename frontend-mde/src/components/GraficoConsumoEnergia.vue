@@ -1,11 +1,14 @@
 <template>
   <div id="consumoEnergia">
-    <h2>Seu consumo de energia</h2>
+    <h2>Seu consumo de energia (kWh)</h2>
     <div>
       <div>
         <canvas id="consumo-energia"></canvas>
       </div>
       <b-button variant="primary" @click="voltar">Voltar</b-button>
+      <b-button variant="danger" v-if="aparecerParar" @click="parar"
+        >Parar</b-button
+      >
     </div>
   </div>
 </template>
@@ -20,11 +23,15 @@ export default {
     consumo: {
       required: true,
       type: Array
-    }
+    },
+    aparecerParar: Boolean
   },
   methods: {
     voltar() {
       this.$emit("changeSucess");
+    },
+    parar() {
+      this.$emit("parar");
     },
     createChart(chartId, chartData) {
       const ctx = document.getElementById(chartId);
@@ -40,6 +47,12 @@ export default {
       "consumo-energia",
       consumoEnergiaGraph("consumo", this.consumo)
     );
+    this.$bus.$on("novaEmissao", () => {
+      this.createChart(
+        "consumo-energia",
+        consumoEnergiaGraph("consumo", this.consumo)
+      );
+    });
   }
 };
 </script>
