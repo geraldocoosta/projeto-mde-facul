@@ -61,7 +61,7 @@ export default {
     return {
       consumo: [],
       timer: 0,
-      tempoVerificacao: null,
+      tempoVerificacao: 1,
       nomeAparelho: null,
       sucess: false,
       aparelhosAferidos: null,
@@ -98,7 +98,7 @@ export default {
     resetConsumo() {
       this.timer = null;
       this.nomeAparelho = "";
-      this.tempoVerificacao = null;
+      this.tempoVerificacao = 1;
     },
     onPararTimer() {
       if (this.timer) {
