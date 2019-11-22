@@ -1,33 +1,9 @@
 <template>
   <div id="home">
     <div>
-      <b-row class="my-1">
-        <b-input-group class="mt-3">
-          <b-form-input
-            v-model="nomeAparelho"
-            id="nome-aparelho"
-            placeholder="Nome do aparelho"
-          ></b-form-input>
-          <b-input-group-append>
-            <b-button
-              variant="outline-success"
-              v-if="sucess"
-              @click="salvarLocalStorage"
-              >Salvar aferição</b-button
-            >
-          </b-input-group-append>
-        </b-input-group>
-      </b-row>
-      <b-row class="my-1" v-if="!sucess">
-        <b-form-input
-          type="number"
-          v-model.number="tempoVerificacao"
-          placeholder="Tempo em segundos para verificação"
-        ></b-form-input>
-      </b-row>
-      <b-button v-if="!sucess" variant="primary" v-on:click="submitFile()"
-        >Começar medição</b-button
-      >
+      <b-button v-if="!sucess" variant="primary" v-b-modal.modal-tempo-medicao>
+        Começar medição
+      </b-button>
     </div>
     <grafico-consumo-energia
       v-if="sucess"
@@ -35,13 +11,43 @@
       :aparecerParar="!!timer"
       @parar="onPararTimer"
       @changeSucess="changeSucess"
+      @salvarMedicao="salvarLocalStorage"
     />
     <hr />
     <b-table
       @row-clicked="onRowClicked"
       hover
+      :fields="aparelhosAferidosFields"
       :items="aparelhosAferidos"
-    ></b-table>
+    >
+      <template v-slot:cell(acoes)="data">
+        <button
+          class="btn btn-danger float-right"
+          @click="excluirAparelhos(data)"
+        >
+          X
+        </button>
+      </template>
+    </b-table>
+    <b-modal
+      ref="modal-tempo-medicao"
+      hide-footer
+      id="modal-tempo-medicao"
+      title="Intervalo de amostra"
+    >
+      <p class="my-4">
+        Digite o intervalo de segundos para ser apresentado gráficamente!
+      </p>
+      <b-form-input
+        type="number"
+        v-model.number="tempoVerificacao"
+        placeholder="Entre com a quantidade em segundos"
+      />
+      <hr />
+      <b-button variant="primary" @click="comecarMedicao">
+        Começar Medição
+      </b-button>
+    </b-modal>
   </div>
 </template>
 
@@ -58,7 +64,15 @@ export default {
       tempoVerificacao: null,
       nomeAparelho: null,
       sucess: false,
-      aparelhosAferidos: null
+      aparelhosAferidos: null,
+      aparelhosAferidosFields: [
+        { key: "aparelhos", label: "Aparelhos" },
+        {
+          key: "acoes",
+          label: "Ações",
+          tdClass: "d-flex justify-content-center"
+        }
+      ]
     };
   },
   components: {
@@ -69,33 +83,27 @@ export default {
       let aparelhos = JSON.parse(localStorage.getItem("aparelhos")) || {};
       this.consumo = aparelhos[item.aparelhos];
       console.log(this.consumo);
-      this.$bus.$emit("novaEmissao");
+      this.$bus.$emit("novaEmissao", this.consumo);
       this.sucess = true;
     },
-    salvarLocalStorage() {
-      if (this.nomeAparelho) {
-        let aparelhos = JSON.parse(localStorage.getItem("aparelhos")) || {};
-        aparelhos[this.nomeAparelho] = this.consumo;
-        localStorage.setItem("aparelhos", JSON.stringify(aparelhos));
-        this.resetConsumo();
-      } else {
-        document.querySelector("#nome-aparelho").classList.add("invalid");
-        setTimeout(() => {
-          document.querySelector("#nome-aparelho").classList.remove("invalid");
-        }, 5000);
-      }
+    salvarLocalStorage(nomeAparelho) {
+      debugger;
+      let aparelhos = JSON.parse(localStorage.getItem("aparelhos")) || {};
+      aparelhos[nomeAparelho] = this.consumo;
+      localStorage.setItem("aparelhos", JSON.stringify(aparelhos));
+      this.resetConsumo();
+      this.buscarAparelhosSalvos();
+      this.sucess = false;
     },
     resetConsumo() {
-      this.consumo = [];
       this.timer = null;
-      this.sucess = false;
       this.nomeAparelho = "";
       this.tempoVerificacao = null;
     },
     onPararTimer() {
       if (this.timer) {
         clearTimeout(this.timer);
-        this.timer = null;
+        this.resetConsumo();
       }
     },
     changeSucess() {
@@ -103,14 +111,21 @@ export default {
       if (this.timer) {
         clearTimeout(this.timer);
         this.timer = null;
+        this.consumo = [];
       }
+    },
+    excluirAparelhos({ item }) {
+      let aparelhos = JSON.parse(localStorage.getItem("aparelhos"));
+      delete aparelhos[item.aparelhos];
+      localStorage.setItem("aparelhos", JSON.stringify(aparelhos));
+      this.buscarAparelhosSalvos();
     },
     buscaInformacoes() {
       axios
         .get("http://localhost:3000/buscar-energia")
         .then(res => {
           this.consumo.push(res.data);
-          this.$bus.$emit("novaEmissao");
+          this.$bus.$emit("novaEmissao", this.consumo);
         })
         .catch(() => console.log("failure"));
     },
@@ -122,18 +137,22 @@ export default {
         tempoRequisicao
       );
     },
-    submitFile() {
+    comecarMedicao() {
+      this.$refs["modal-tempo-medicao"].hide();
       this.sucess = true;
       this.buscaInformacoesCadaSegundo();
+    },
+    buscarAparelhosSalvos() {
+      let nomeAparelhos = Object.keys(
+        JSON.parse(localStorage.getItem("aparelhos"))
+      );
+      this.aparelhosAferidos = nomeAparelhos.map(key => {
+        return { aparelhos: key };
+      });
     }
   },
   created() {
-    let nomeAparelhos = Object.keys(
-      JSON.parse(localStorage.getItem("aparelhos"))
-    );
-    this.aparelhosAferidos = nomeAparelhos.map(key => {
-      return { aparelhos: key };
-    });
+    this.buscarAparelhosSalvos();
   }
 };
 </script>
@@ -146,8 +165,5 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
-}
-.invalid {
-  border-color: #dc3545 !important;
 }
 </style>
