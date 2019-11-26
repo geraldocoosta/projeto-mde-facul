@@ -87,7 +87,7 @@ export default {
   },
   computed: {
     pegaNada() {
-      return (this.valor * 0.000557).toFixed(2);
+      return (this.valor * 0.000557).toFixed(4);
     }
   },
   methods: {
