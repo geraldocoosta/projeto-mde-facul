@@ -16,7 +16,7 @@
         />
       </b-col>
       <b-col cols="2" class="mt-5">
-        <h1>Seu consumo é de R$:{{ pegaNada }}</h1>
+        <h1>Seu consumo é de R${{ pegaNada }}</h1>
       </b-col>
     </b-row>
     <hr />
