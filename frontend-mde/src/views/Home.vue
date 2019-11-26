@@ -82,12 +82,12 @@ export default {
     onRowClicked(item) {
       let aparelhos = JSON.parse(localStorage.getItem("aparelhos")) || {};
       this.consumo = aparelhos[item.aparelhos];
-      console.log(this.consumo);
-      this.$bus.$emit("novaEmissao", this.consumo);
       this.sucess = true;
+      setTimeout(() => {
+        this.$bus.$emit("novaEmissao", this.consumo);
+      }, 300)
     },
     salvarLocalStorage(nomeAparelho) {
-      debugger;
       let aparelhos = JSON.parse(localStorage.getItem("aparelhos")) || {};
       aparelhos[nomeAparelho] = this.consumo;
       localStorage.setItem("aparelhos", JSON.stringify(aparelhos));
@@ -102,16 +102,17 @@ export default {
     },
     onPararTimer() {
       if (this.timer) {
-        clearTimeout(this.timer);
+        clearInterval(this.timer);
         this.resetConsumo();
       }
     },
     changeSucess() {
       this.sucess = false;
+      this.consumo = [];
+      this.$bus.$emit("novaEmissao", this.consumo);
       if (this.timer) {
-        clearTimeout(this.timer);
+        clearInterval(this.timer);
         this.timer = null;
-        this.consumo = [];
       }
     },
     excluirAparelhos({ item }) {
@@ -131,15 +132,16 @@ export default {
     },
     buscaInformacoesCadaSegundo() {
       let tempoRequisicao = this.tempoVerificacao * 1000 || 1000;
-      this.buscaInformacoes();
-      this.timer = setTimeout(
-        this.buscaInformacoesCadaSegundo,
+      this.timer = setInterval(
+        this.buscaInformacoes,
         tempoRequisicao
       );
     },
     comecarMedicao() {
       this.$refs["modal-tempo-medicao"].hide();
       this.sucess = true;
+      this.consumo = [];
+      this.$bus.$emit("novaEmissao", this.consumo);
       this.buscaInformacoesCadaSegundo();
     },
     buscarAparelhosSalvos() {

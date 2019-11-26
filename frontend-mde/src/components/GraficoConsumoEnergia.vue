@@ -1,6 +1,6 @@
 <template>
   <div id="consumoEnergia">
-    <h2>Seu consumo de energia (kWh)</h2>
+    <h2>Seu consumo de energia (Wh)</h2>
     <div>
       <div>
         <canvas id="consumo-energia"></canvas>
