@@ -5,10 +5,9 @@
         Começar medição
       </b-button>
     </div>
-    <b-row>
+    <b-row v-if="sucess">
       <b-col cols="10">
         <grafico-consumo-energia
-          v-if="sucess"
           :consumo="consumo"
           :aparecerParar="!!timer"
           @parar="onPararTimer"
@@ -16,8 +15,8 @@
           @salvarMedicao="salvarLocalStorage"
         />
       </b-col>
-      <b-col cols="2">
-        <p>Seu consumo é de R$:{{ pegaNada }}</p>
+      <b-col cols="2" class="mt-5">
+        <h1>Seu consumo é de R$:{{ pegaNada }}</h1>
       </b-col>
     </b-row>
     <hr />
@@ -124,6 +123,7 @@ export default {
       this.sucess = false;
       this.consumo = [];
       this.$bus.$emit("novaEmissao", this.consumo);
+      this.valor = 0;
       if (this.timer) {
         clearInterval(this.timer);
         this.timer = null;
