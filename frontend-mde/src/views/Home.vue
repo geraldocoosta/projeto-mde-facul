@@ -5,14 +5,21 @@
         Começar medição
       </b-button>
     </div>
-    <grafico-consumo-energia
-      v-if="sucess"
-      :consumo="consumo"
-      :aparecerParar="!!timer"
-      @parar="onPararTimer"
-      @changeSucess="changeSucess"
-      @salvarMedicao="salvarLocalStorage"
-    />
+    <b-row>
+      <b-col cols="10">
+        <grafico-consumo-energia
+          v-if="sucess"
+          :consumo="consumo"
+          :aparecerParar="!!timer"
+          @parar="onPararTimer"
+          @changeSucess="changeSucess"
+          @salvarMedicao="salvarLocalStorage"
+        />
+      </b-col>
+      <b-col cols="2">
+        <p>Seu consumo é de R$:{{ pegaNada }}</p>
+      </b-col>
+    </b-row>
     <hr />
     <b-table
       @row-clicked="onRowClicked"
@@ -61,6 +68,7 @@ export default {
     return {
       consumo: [],
       timer: 0,
+      valor: 0,
       tempoVerificacao: 1,
       nomeAparelho: null,
       sucess: false,
@@ -78,14 +86,20 @@ export default {
   components: {
     GraficoConsumoEnergia
   },
+  computed: {
+    pegaNada() {
+      return this.valor;
+    }
+  },
   methods: {
     onRowClicked(item) {
       let aparelhos = JSON.parse(localStorage.getItem("aparelhos")) || {};
       this.consumo = aparelhos[item.aparelhos];
       this.sucess = true;
+      this.valor = Math.max.apply(null, this.consumo.map(c => c.acumulativo));
       setTimeout(() => {
         this.$bus.$emit("novaEmissao", this.consumo);
-      }, 300)
+      }, 300);
     },
     salvarLocalStorage(nomeAparelho) {
       let aparelhos = JSON.parse(localStorage.getItem("aparelhos")) || {};
@@ -125,6 +139,7 @@ export default {
       axios
         .get("http://localhost:3000/buscar-energia")
         .then(res => {
+          this.valor = res.data.acumulativo;
           this.consumo.push(res.data);
           this.$bus.$emit("novaEmissao", this.consumo);
         })
@@ -132,17 +147,16 @@ export default {
     },
     buscaInformacoesCadaSegundo() {
       let tempoRequisicao = this.tempoVerificacao * 1000 || 1000;
-      this.timer = setInterval(
-        this.buscaInformacoes,
-        tempoRequisicao
-      );
+      this.timer = setInterval(this.buscaInformacoes, tempoRequisicao);
     },
     comecarMedicao() {
       this.$refs["modal-tempo-medicao"].hide();
       this.sucess = true;
       this.consumo = [];
-      this.$bus.$emit("novaEmissao", this.consumo);
-      this.buscaInformacoesCadaSegundo();
+      setTimeout(() => {
+        this.$bus.$emit("novaEmissao", this.consumo);
+        this.buscaInformacoesCadaSegundo();
+      }, 300);
     },
     buscarAparelhosSalvos() {
       let nomeAparelhos = Object.keys(
