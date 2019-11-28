@@ -11,6 +11,7 @@
               v-model="aparelhos"
               :options="aparelhosOptions"
               stacked
+              class="d-flex justify-content-center"
               buttons
             ></b-form-checkbox-group>
           </b-form-group>
