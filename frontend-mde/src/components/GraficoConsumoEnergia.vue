@@ -6,10 +6,17 @@
         <canvas id="consumo-energia"></canvas>
       </div>
       <b-button variant="primary" @click="voltar">Voltar</b-button>
-      <b-button variant="danger" v-if="aparecerParar" @click="parar">
+      <b-button
+        variant="danger"
+        v-if="aparecerParar && botaoSalvarEdicao"
+        @click="parar"
+      >
         Parar
       </b-button>
-      <b-button v-b-modal.modal-salvar-medicao v-else variant="success"
+      <b-button
+        v-b-modal.modal-salvar-medicao
+        v-if="!aparecerParar && botaoSalvarEdicao"
+        variant="success"
         >Salvar Medicao
       </b-button>
     </div>
@@ -52,7 +59,8 @@ export default {
       required: true,
       type: Array
     },
-    aparecerParar: Boolean
+    aparecerParar: Boolean,
+    botaoSalvarEdicao: Boolean
   },
   data() {
     return {

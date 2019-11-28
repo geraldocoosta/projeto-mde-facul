@@ -8,6 +8,7 @@
     <b-row v-if="sucess">
       <b-col cols="10">
         <grafico-consumo-energia
+          :botaoSalvarEdicao="botaoSalvarMedicao"
           :consumo="consumo"
           :aparecerParar="!!timer"
           @parar="onPararTimer"
@@ -69,6 +70,7 @@ export default {
       consumo: [],
       timer: 0,
       valor: 0,
+      botaoSalvarMedicao: true,
       tempoVerificacao: 1,
       nomeAparelho: null,
       sucess: false,
@@ -97,6 +99,7 @@ export default {
       this.consumo = aparelhos[item.aparelhos];
       this.sucess = true;
       this.valor = Math.max.apply(null, this.consumo.map(c => c.acumulativo));
+      this.botaoSalvarMedicao = false;
       setTimeout(() => {
         this.$bus.$emit("novaEmissao", this.consumo);
       }, 300);
@@ -108,11 +111,13 @@ export default {
       this.resetConsumo();
       this.buscarAparelhosSalvos();
       this.sucess = false;
+      this.botaoSalvarMedicao = true;
     },
     resetConsumo() {
       this.timer = null;
       this.nomeAparelho = "";
       this.tempoVerificacao = 1;
+      this.botaoSalvarMedicao = true;
     },
     onPararTimer() {
       if (this.timer) {
@@ -123,6 +128,7 @@ export default {
     changeSucess() {
       this.sucess = false;
       this.consumo = [];
+      this.botaoSalvarMedicao = true;
       this.$bus.$emit("novaEmissao", this.consumo);
       this.valor = 0;
       if (this.timer) {
@@ -135,6 +141,7 @@ export default {
       delete aparelhos[item.aparelhos];
       localStorage.setItem("aparelhos", JSON.stringify(aparelhos));
       this.buscarAparelhosSalvos();
+      this.botaoSalvarMedicao = true;
     },
     buscaInformacoes() {
       axios
