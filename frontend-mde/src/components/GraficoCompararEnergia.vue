@@ -1,6 +1,15 @@
 <template>
   <div>
-    <canvas id="consumo-energia"></canvas>
+    <b-row>
+      <b-col cols="9">
+        <div>
+          <canvas id="consumo-energia"></canvas>
+        </div>
+      </b-col>
+      <b-col>
+        <h1>O valor dos aparelhos somados é ≅ R${{ totalGasto }}</h1>
+      </b-col>
+    </b-row>
   </div>
 </template>
 
@@ -13,26 +22,37 @@ export default {
   props: {
     comparar: Array
   },
-  date() {
+  data() {
     return {
-      chart: null
+      chart: null,
+      valores: [],
+      totalGasto: 0
     };
   },
   watch: {
     comparar() {
-      if (this.comparar.length) {
-        this.mapearValores();
-      } else {
-        if (this.chart) {
-          this.chart.destroy;
-        }
-      }
+      this.mapearValores();
+      this.createChart(
+        "consumo-energia",
+        compararEnergiaGraph("Comparação mensuracoes", this.valores)
+      );
+      this.valorTotal();
     }
   },
   methods: {
+    valorTotal() {
+      if (this.valores.length) {
+        let kwSomado = this.valores
+          .map(aparelho => Number(aparelho.acumulado))
+          .reduce((acc, cur) => acc + cur);
+        this.totalGasto = (kwSomado * 0.000557).toFixed(4);
+      } else {
+        this.totalGasto = 0;
+      }
+    },
     mapearValores() {
       let aparelhos = JSON.parse(localStorage.getItem("aparelhos")) || {};
-      let teste = this.comparar.map(aparelho => {
+      this.valores = this.comparar.map(aparelho => {
         let mensuracao = aparelhos[aparelho];
         let acumulado = Math.max.apply(
           null,
@@ -40,7 +60,6 @@ export default {
         );
         return { aparelho, acumulado };
       });
-      this.createChart("consumo-energia", compararEnergiaGraph("Bla", teste));
     },
     createChart(chartId, chartData) {
       if (this.chart) {
@@ -56,5 +75,3 @@ export default {
   }
 };
 </script>
-
-<style></style>

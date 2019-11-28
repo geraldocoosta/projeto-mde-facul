@@ -17,11 +17,8 @@
             ></b-form-checkbox-group>
           </b-form-group>
         </b-col>
-        <b-col cols="8">
+        <b-col cols="10">
           <grafico-comparar-energia :comparar="aparelhos" />
-        </b-col>
-        <b-col cols="2">
-          ops
         </b-col>
       </b-row>
     </div>
@@ -35,7 +32,7 @@ export default {
   data() {
     return {
       aparelhos: [],
-      aparelhosOptions: [],
+      aparelhosOptions: []
     };
   },
   components: {

@@ -16,7 +16,7 @@
         />
       </b-col>
       <b-col cols="2" class="mt-5">
-        <h1>Seu consumo é de R${{ pegaNada }}</h1>
+        <h1>Seu consumo é de ≅ R${{ valorReais }}</h1>
       </b-col>
     </b-row>
     <hr />
@@ -86,7 +86,7 @@ export default {
     GraficoConsumoEnergia
   },
   computed: {
-    pegaNada() {
+    valorReais() {
       return (this.valor * 0.000557).toFixed(4);
     }
   },

@@ -23,6 +23,15 @@ export default (tituloGraph, comparacao) => {
       lineTension: 1,
       legend: {
         display: false
+      },
+      scales: {
+        yAxes: [
+          {
+            ticks: {
+              beginAtZero: true
+            }
+          }
+        ]
       }
     }
   };

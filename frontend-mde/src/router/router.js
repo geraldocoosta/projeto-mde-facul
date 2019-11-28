@@ -16,6 +16,12 @@ const router = new Router({
       path: "comparar",
       name: "comparar",
       component: CompararMensuracoes
+    },
+    {
+      path: "*",
+      redirect: {
+        name: "home"
+      }
     }
   ]
 });
