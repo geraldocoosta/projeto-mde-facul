@@ -6,7 +6,7 @@
           <canvas id="consumo-energia"></canvas>
         </div>
       </b-col>
-      <b-col>
+      <b-col v-if="totalGasto">
         <h1>O valor dos aparelhos somados é ≅ R${{ totalGasto }}</h1>
       </b-col>
     </b-row>

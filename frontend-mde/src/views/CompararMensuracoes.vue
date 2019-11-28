@@ -1,5 +1,5 @@
 <template>
-  <div id="comparar-mensuracoes">
+  <div class="mt-5" id="comparar-mensuracoes">
     <div class="d-flex justify-content-center mb-3">
       <h2>Seu gasto com energia</h2>
     </div>
@@ -10,9 +10,7 @@
             <b-form-checkbox-group
               v-model="aparelhos"
               :options="aparelhosOptions"
-              button-variant="primary"
               stacked
-              name="buttons-1"
               buttons
             ></b-form-checkbox-group>
           </b-form-group>
@@ -54,4 +52,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+legend {
+  font-size: 1.5em !important;
+}
+</style>
