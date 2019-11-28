@@ -19,10 +19,11 @@
         <h1>Seu consumo é de ≅ R${{ valorReais }}</h1>
       </b-col>
     </b-row>
-    <hr />
     <b-table
       @row-clicked="onRowClicked"
       hover
+      class="mt-3"
+      striped
       :fields="aparelhosAferidosFields"
       :items="aparelhosAferidos"
     >
